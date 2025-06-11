@@ -64,14 +64,15 @@ class User(UserBase):
 class BookingBase(BaseModel):
     instrument_id: int
     slot: datetime
-    requested_by_id: int
     requested_to_id: int
     status: Optional[BookingStatus] = BookingStatus.pending
+
 
 class BookingCreate(BookingBase):
     pass
 
 class Booking(BookingBase):
+    requested_by_id : int
     id: int
 
     class Config:

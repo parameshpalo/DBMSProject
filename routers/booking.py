@@ -20,14 +20,7 @@ def create_booking(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    # Ensure user books for themselves
-    if booking_data.requested_by_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You can only book an instrument for yourself."
-        )
-
-    # Optional: prevent double booking of same instrument+slot
+    # Optional: prevent double booking
     overlap = db.query(models.Booking).filter(
         models.Booking.instrument_id == booking_data.instrument_id,
         models.Booking.slot == booking_data.slot
@@ -36,11 +29,19 @@ def create_booking(
     if overlap:
         raise HTTPException(status_code=400, detail="This time slot is already booked.")
 
-    new_booking = models.Booking(**booking_data.dict())
+    new_booking = models.Booking(
+        instrument_id=booking_data.instrument_id,
+        slot=booking_data.slot,
+        requested_to_id=booking_data.requested_to_id,
+        requested_by_id=current_user.id,  # Set from auth user
+        status="pending"  # Default value
+    )
+
     db.add(new_booking)
     db.commit()
     db.refresh(new_booking)
     return new_booking
+
 
 
 # --------- GET USER'S BOOKINGS ---------
