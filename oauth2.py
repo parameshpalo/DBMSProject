@@ -12,7 +12,7 @@ SECRET_KEY = "your_secret_key_here"  # 🔐 Replace with a secure, long random s
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")  # POST /login
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="user/login")  # POST /login
 
 
 # ----- 1. CREATE JWT TOKEN -----

@@ -14,18 +14,22 @@ class BookingStatusEnum(str, enum.Enum):
     rejected = "rejected"
 
 class Labs(Base):
-    __tablename__="labs"
-    id=Column(Integer,primary_key=True,autoincrement=True)
-    name=Column(String,nullable=False)
+    __tablename__ = "labs"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False)
+
+    instruments = relationship("Instrument", back_populates="lab")
+
 
 class Instrument(Base):
     __tablename__ = "instruments"
 
     instrument_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     instrument_name = Column(String, nullable=False)
-    lab_id = Column(Integer,ForeignKey("labs.id"),nullable=False)
+    lab_id = Column(Integer, ForeignKey("labs.id"), nullable=False)
     working = Column(Boolean, default=True)
 
+    lab = relationship("Labs", back_populates="instruments")
     bookings = relationship("Booking", back_populates="instrument")
 
 

@@ -14,11 +14,23 @@ class BookingStatus(str, PyEnum):
     approved = "approved"
     rejected = "rejected"
 
+# ----------- LABS -----------
+class LabBase(BaseModel):
+    name: str
+
+class LabCreate(LabBase):
+    pass
+
+class Lab(LabBase):
+    id: int
+    class Config:
+        orm_mode = True
+
 
 # ----------- INSTRUMENT SCHEMAS -----------
 class InstrumentBase(BaseModel):
     instrument_name: str
-    lab_name: str
+    lab_id: int
     working: Optional[bool] = True
 
 class InstrumentCreate(InstrumentBase):
