@@ -39,7 +39,7 @@ def approve_or_reject_booking(
     if booking.requested_to_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to make a decision on this booking")
 
-    booking.approved = decision.approved
+    booking.approved = decision.status
     db.commit()
     db.refresh(booking)
     return booking

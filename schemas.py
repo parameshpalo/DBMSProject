@@ -9,6 +9,11 @@ class PrivilegeLevel(str, PyEnum):
     user = "user"
     admin = "admin"
 
+class BookingStatus(str, PyEnum):
+    pending = "pending"
+    approved = "approved"
+    rejected = "rejected"
+
 
 # ----------- INSTRUMENT SCHEMAS -----------
 class InstrumentBase(BaseModel):
@@ -43,12 +48,13 @@ class User(UserBase):
 
 
 # ----------- BOOKING SCHEMAS -----------
+
 class BookingBase(BaseModel):
     instrument_id: int
     slot: datetime
     requested_by_id: int
     requested_to_id: int
-    approved: Optional[bool] = False
+    status: Optional[BookingStatus] = BookingStatus.pending
 
 class BookingCreate(BookingBase):
     pass
@@ -61,4 +67,5 @@ class Booking(BookingBase):
 
 # ----------- BOOKING UPDATE SCHEMA -----------
 class BookingStatusUpdate(BaseModel):
-    approved: bool
+    status: BookingStatus
+

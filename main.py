@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 from routers import instruments,booking,users,approving
 
+import models
+import db
+models.Base.metadata.create_all(bind=db.engine)
+
 app=FastAPI()
 
 app.include_router(instruments.router)
