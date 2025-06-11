@@ -32,6 +32,7 @@ class UserBase(BaseModel):
     privilege_level: PrivilegeLevel
 
 class UserCreate(UserBase):
+    password: str
     pass
 
 class User(UserBase):

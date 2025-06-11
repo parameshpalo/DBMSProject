@@ -24,6 +24,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     username = Column(String, unique=True, nullable=False)
+    password= Column(String,nullable=False)
     privilege_level = Column(Enum(PrivilegeLevelEnum), nullable=False)
 
     bookings_requested = relationship("Booking", foreign_keys='Booking.requested_by_id', back_populates="requested_by")
