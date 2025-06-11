@@ -1,11 +1,12 @@
 from fastapi import FastAPI
-from routers import instruments,booking,users
+from routers import instruments,booking,users,approving
 
 app=FastAPI()
 
 app.include_router(instruments.router)
 app.include_router(booking.router)
 app.include_router(users.router)
+app.include_router(approving.router)
 
 @app.get('/')
 def root():

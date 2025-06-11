@@ -58,3 +58,7 @@ class Booking(BookingBase):
 
     class Config:
         orm_mode = True
+
+# ----------- BOOKING UPDATE SCHEMA -----------
+class BookingStatusUpdate(BaseModel):
+    approved: bool

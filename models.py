@@ -8,12 +8,22 @@ class PrivilegeLevelEnum(str, enum.Enum):
     user = "user"
     admin = "admin"
 
+class BookingStatusEnum(str, enum.Enum):
+    pending = "pending"
+    approved = "approved"
+    rejected = "rejected"
+
+class Labs(Base):
+    __tablename__="labs"
+    id=Column(Integer,primary_key=True,autoincrement=True)
+    name=Column(String,nullable=False)
+
 class Instrument(Base):
     __tablename__ = "instruments"
 
     instrument_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     instrument_name = Column(String, nullable=False)
-    lab_name = Column(String, nullable=False)
+    lab_id = Column(Integer,ForeignKey("labs.id"),nullable=False)
     working = Column(Boolean, default=True)
 
     bookings = relationship("Booking", back_populates="instrument")
@@ -41,7 +51,8 @@ class Booking(Base):
     requested_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     requested_to_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    approved = Column(Boolean, default=False)
+    status = Column(Enum(BookingStatusEnum), default=BookingStatusEnum.pending, nullable=False)
+
 
     instrument = relationship("Instrument", back_populates="bookings")
     requested_by = relationship("User", foreign_keys=[requested_by_id], back_populates="bookings_requested")
