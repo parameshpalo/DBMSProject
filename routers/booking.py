@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status , Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session,joinedload
 from datetime import datetime
 from typing import List,Optional
 from collections import defaultdict
@@ -50,32 +50,50 @@ def create_booking(
 
 
 # --------- GET USER'S BOOKINGS ---------
-@router.get("/me", response_model=List[schemas.Booking])
-@router.get("/me", response_model=List[schemas.Booking])
-def get_my_bookings(
-    lab_name: Optional[str] = Query(None, description="Filter by lab name"),
-    instrument_name: Optional[str] = Query(None, description="Filter by instrument name"),
-    limit: int = Query(10, ge=1, le=100, description="Limit number of results (max 100)"),
-    offset: int = Query(0, ge=0, description="Number of items to skip for pagination"),
+@router.get("/me", response_model=List[dict])
+def get_my_bookings_formatted(
+    lab_name: Optional[str] = Query(None),
+    instrument_name: Optional[str] = Query(None),
+    limit: int = Query(10, ge=1),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    # Base query: bookings requested by current user
-    query = db.query(models.Booking).join(models.Instrument).join(models.Labs).filter(
-        models.Booking.requested_by_id == current_user.id
-    )
+    query = db.query(models.Booking).join(models.Instrument).join(models.Labs)\
+        .options(
+            joinedload(models.Booking.requested_by),  # eager load requester
+            joinedload(models.Booking.requested_to),  # eager load supervisor
+            joinedload(models.Booking.instrument).joinedload(models.Instrument.lab)  # eager load lab through instrument
+        )\
+        .filter(models.Booking.requested_by_id == current_user.id)
 
-    # Apply optional filters
     if lab_name:
         query = query.filter(models.Labs.name == lab_name)
-
     if instrument_name:
         query = query.filter(models.Instrument.instrument_name == instrument_name)
 
-    # Pagination
-    query = query.offset(offset).limit(limit)
+    bookings = query.offset(offset).limit(limit).all()
 
-    return query.all()
+    result = []
+
+    for idx, booking in enumerate(bookings, start=1):
+        slot_start = booking.slot
+        slot_end = slot_start + timedelta(hours=2)  # assuming slot duration 2 hours
+
+        slot_str = f"{slot_start.strftime('%I:%M %p')} - {slot_end.strftime('%I:%M %p')}"
+        booking_date = slot_start.strftime("%d/%m/%Y %I:%M %p")
+
+        result.append({
+            "S. No.": idx,
+            "Application No.": booking.id,
+            "Slot": slot_str,
+            "Booking Date": booking_date,
+            "status":booking.status,
+            "User name": booking.requested_by.username if booking.requested_by else "Unknown",
+            "Supervisor": booking.requested_to.username if booking.requested_to else "Unknown"
+        })
+
+    return result
 
 # --------- GET ALL BOOKINGS (Admin only, with pagination and filters) ---------
 @router.get("/", response_model=List[schemas.Booking])
